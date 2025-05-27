@@ -2,9 +2,9 @@ name: Build, Test, and Release
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main ]  # Added 'main' as many repositories now use this as default
   pull_request:
-    branches: [ master ]
+    branches: [ master, main ]
 
 jobs:
   test:
@@ -12,36 +12,36 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install pytest pytest-cov
-        
-    - name: Run tests
-      run: |
-        pytest --cov=weather_station tests/
-        
-    - name: Upload test results
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: .coverage
-        
+      - uses: actions/checkout@v4  # Updated from v3 to v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5  # Updated from v4 to v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest pytest-cov
+
+      - name: Run tests
+        run: |
+          pytest --cov=weather_station tests/
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4  # Updated from v3 to v4
+        with:
+          name: test-results
+          path: .coverage
+
   build-packages:
     name: Build Packages for ${{ matrix.os }}
     needs: test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
         include:
           - os: ubuntu-latest
             platform_name: linux
@@ -49,90 +49,90 @@ jobs:
             platform_name: windows
           - os: macos-latest
             platform_name: macos
-            
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine pyinstaller
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      shell: bash
-      
-    - name: Build Python package
-      run: |
-        python setup.py sdist bdist_wheel
-        
-    - name: Build executable with PyInstaller
-      run: |
-        pyinstaller --onefile --name weather_station_collector main.py
-        
-    - name: Create platform-specific archive
-      run: |
-        mkdir -p release-files
-        # Copy wheel package
-        cp dist/*.whl release-files/
-        
-        # Copy executable and any platform-specific files
-        if [ "${{ matrix.platform_name }}" == "windows" ]; then
-          cp dist/weather_station_collector.exe release-files/
-          cp weather-station.service release-files/
-          zip -r weather_station_${{ matrix.platform_name }}.zip release-files
-        else
-          cp dist/weather_station_collector release-files/
-          cp weather-station.service release-files/
-          tar -czvf weather_station_${{ matrix.platform_name }}.tar.gz release-files
-        fi
-      shell: bash
-        
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: weather-station-${{ matrix.platform_name }}
-        path: |
-          dist/*.whl
-          dist/*.tar.gz
-          weather_station_${{ matrix.platform_name }}.*
+      - uses: actions/checkout@v4  # Updated from v3 to v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5  # Updated from v4 to v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine pyinstaller
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        shell: bash
+
+      - name: Build Python package
+        run: |
+          python setup.py sdist bdist_wheel
+
+      - name: Build executable with PyInstaller
+        run: |
+          pyinstaller --onefile --name weather_station_collector main.py
+
+      - name: Create platform-specific archive
+        run: |
+          mkdir -p release-files
+          # Copy wheel package
+          cp dist/*.whl release-files/
           
+          # Copy executable and any platform-specific files
+          if [ "${{ matrix.platform_name }}" == "windows" ]; then
+            cp dist/weather_station_collector.exe release-files/
+            cp weather-station.service release-files/
+            zip -r weather_station_${{ matrix.platform_name }}.zip release-files
+          else
+            cp dist/weather_station_collector release-files/
+            cp weather-station.service release-files/
+            tar -czvf weather_station_${{ matrix.platform_name }}.tar.gz release-files
+          fi
+        shell: bash
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4  # Updated from v3 to v4
+        with:
+          name: weather-station-${{ matrix.platform_name }}
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+            weather_station_${{ matrix.platform_name }}.*
+
   create-release:
     name: Create GitHub Release
     needs: build-packages
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')  # Updated to support both master and main
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
-      
-    - name: Download all artifacts
-      uses: actions/download-artifact@v3
-      with:
-        path: artifacts
-        
-    - name: Display structure of downloaded files
-      run: ls -R artifacts
-        
-    - name: Get version from package
-      id: get_version
-      run: |
-        VERSION=$(python -c "from setuptools import setup; setup()" --version)
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        
-    - name: Create Release
-      id: create_release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: v${{ steps.get_version.outputs.version }}
-        name: Release v${{ steps.get_version.outputs.version }}
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-        files: |
-          artifacts/weather-station-linux/*
-          artifacts/weather-station-windows/*
-          artifacts/weather-station-macos/*
+      - uses: actions/checkout@v4  # Updated from v3 to v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4  # Updated from v3 to v4
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Get version from package
+        id: get_version
+        run: |
+          VERSION=$(python -c "from setuptools import setup; setup()" --version)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: Release v${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/weather-station-linux/*
+            artifacts/weather-station-windows/*
+            artifacts/weather-station-macos/*

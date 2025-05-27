@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="weather_station",
+    name="ws_data_uploader",
     version="0.1.0",
     packages=find_packages(),
     install_requires=[
@@ -29,7 +29,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "weather-station=weather_station.main:main",
+            "ws_data_uploader=weather_station.main:main",
         ],
     },
     python_requires=">=3.12",
@@ -38,7 +38,7 @@ setup(
     description="A robust, cross-platform application for collecting, storing, and managing weather station data created by idokep.hu",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/weather-station",
+    url="https://github.com/UROM-KTE/ws_data_uploader",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

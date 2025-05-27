@@ -166,7 +166,7 @@ weather-station/
 
 1. Clone the repository:
    ```shell script
-   git clone [https://github.com/yourusername/weather-station.git](https://github.com/yourusername/weather-station.git) cd weather-station
+   git clone [https://github.com/UROM-KTE/ws_data_uploader](https://github.com/UROM-KTE/ws_data_uploader) cd ws_data_uploader
    ``` 
 
    ```
