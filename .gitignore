@@ -1,0 +1,17 @@
+# Python related
+.venv/
+
+# IDE related
+.idea/
+*.iml
+.vscode/
+
+# Project related
+weather_station.log
+weather_station_collector.spec
+local_cache.db
+.coverage
+build/
+logs/
+dist/
+weather_station.egg-info/

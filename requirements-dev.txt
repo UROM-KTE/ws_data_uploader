@@ -1,0 +1,11 @@
+black~=25.1.0
+build~=1.2.2
+flake8~=7.2.0
+mypy~=1.15.0
+pyinstaller~=6.13.0
+pytest~=8.3.5
+pytest-cov~=6.1.1
+types-psycopg2~=2.9.21.20250516
+types-requests~=310.0.0.20250516
+types-pywin32~=2.32.0.20250515
+wheel~=0.46.1

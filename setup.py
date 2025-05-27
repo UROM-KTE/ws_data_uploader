@@ -1,0 +1,50 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="weather_station",
+    version="0.1.0",
+    packages=find_packages(),
+    install_requires=[
+        "psycopg2-binary>=2.9.10",
+        "pywin32>=310; platform_system=='Windows'",
+        "requests>=2.31.0",
+        "schedule>=1.2.2",
+        "servicemanager>=2.0.10",
+        "setuptools>=80.8.0",
+    ],
+    extras_require={
+        "dev": [
+            "black>=25.1.0",
+            "build>=1.2.2",
+            "flake8>=7.2.0",
+            "mypy>=1.15.0",
+            "pyinstaller>=6.13.0",
+            "pytest>=8.3.5",
+            "pytest-cov>=6.1.1",
+            "types-psycopg2>=2.9.21.20250516",
+            "types-requests>=310.0.0.20250516",
+            "types-pywin32>=2.32.0.20250515",
+            "wheel>=0.46.1",
+        ],
+    },
+    entry_points={
+        "console_scripts": [
+            "weather-station=weather_station.main:main",
+        ],
+    },
+    python_requires=">=3.12",
+    author="Attila Ferenc",
+    author_email="attila.ferenc.dev@gmail.com",
+    description="A robust, cross-platform application for collecting, storing, and managing weather station data created by idokep.hu",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/yourusername/weather-station",
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+    ],
+)

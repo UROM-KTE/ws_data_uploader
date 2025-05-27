@@ -1,0 +1,18 @@
+{
+  "station_ip": "192.168.1.2",
+  "station_name": "Időkép Állomás, Besenyőtelek, Tepélypuszta",
+  "station_location": [
+    47.679060665601654,
+    20.507625142343006
+  ],
+  "database_host": "db.del-heves.hu",
+  "database_port": "5432",
+  "database_name": "weather",
+  "database_user": "weather_data_upload_client",
+  "database_password": "",
+  "log_type": "both",
+  "log_level": "INFO",
+  "log_file": "logs/weather_station.log",
+  "log_max_size": 5242880,
+  "log_backup_count": 3
+}
