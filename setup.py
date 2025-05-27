@@ -7,9 +7,9 @@ setup(
     install_requires=[
         "psycopg2-binary>=2.9.10",
         "pywin32>=310; platform_system=='Windows'",
+        "servicemanager==2.0.10",
         "requests==2.32.3",
         "schedule>=1.2.2",
-        "servicemanager==2.0.10",
         "setuptools>=80.8.0",
     ],
     extras_require={
