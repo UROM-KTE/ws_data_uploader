@@ -132,10 +132,11 @@ jobs:
       - name: Get version from package
         id: get_version
         run: |
-          VERSION=$(python -c "from setuptools import setup; setup()" --version)
+          VERSION=$(grep -m 1 "version=" setup.py | sed -E 's/.*version="([^"]+)".*/\1/')
+          echo "Extracted version: $VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Create Release
+      - name: Create versioned release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
@@ -144,6 +145,22 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+          files: |
+            artifacts/weather-station-linux/*
+            artifacts/weather-station-windows/*
+            artifacts/weather-station-macos/*
+
+      - name: Create latest release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          name: Latest Release
+          draft: false
+          prerelease: false
+          body: |
+            This is always the latest release (currently v${{ steps.get_version.outputs.version }}).
+            
+            For a specific version, check the [releases page](https://github.com/${{ github.repository }}/releases).
           files: |
             artifacts/weather-station-linux/*
             artifacts/weather-station-windows/*

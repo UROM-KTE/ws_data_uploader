@@ -31,12 +31,17 @@ these platforms is welcomed.
 
 #### Option 1: Install from release packages
 
-1. Download the appropriate package for your operating system from
-   the [Releases](https://github.com/yourusername/weather-station/releases) page.
+1. Get the latest version:
+
+    - [Windows (zip)](https://github.com/UROM-KTE/ws_data_uploader/releases/download/latest/weather_station_windows.zip)
+    - [Linux (tar.gz)](https://github.com/UROM-KTE/ws_data_uploader/releases/download/latest/weather_station_linux.tar.gz)
+    - [macOS (tar.gz)](https://github.com/UROM-KTE/ws_data_uploader/releases/download/latest/weather_station_macos.tar.gz)
+
+   Or visit the [releases page](https://github.com/UROM-KTE/ws_data_uploader/releases) for older versions.
 
 2. Extract the package contents to your desired location.
 
-3. Configure your `settings.json` file with your weather station and database details (see Configuration section).
+3. Configure your `settings.json` file with your weather station and database details (see the Configuration section).
 
 4. Run the application:
 
