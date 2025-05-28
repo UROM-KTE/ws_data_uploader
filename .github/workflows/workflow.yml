@@ -32,13 +32,15 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest --cov=weather_station tests/
+          pytest --cov=weather_station --cov-report=xml:coverage.xml --cov-report=term --cov-report=html:coverage_html tests/
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: .coverage
+          path: |
+            coverage.xml
+            coverage_html/
 
   build-packages:
     name: Build Packages for ${{ matrix.os }}
@@ -93,7 +95,7 @@ jobs:
           if [ "${{ matrix.platform_name }}" == "windows" ]; then
             cp dist/weather_station_collector.exe release-files/
             cp weather-station.service release-files/
-            zip -r weather_station_${{ matrix.platform_name }}.zip release-files
+            powershell -command "Compress-Archive -Path release-files/* -DestinationPath weather_station_${{ matrix.platform_name }}.zip"
           else
             cp dist/weather_station_collector release-files/
             cp weather-station.service release-files/

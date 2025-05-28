@@ -19,9 +19,13 @@ local backup capabilities.
 
 ### Prerequisites
 
-- Python 3.12 or newer (tested on 3.12)
+- Python 3.12
 - PostgreSQL database (local or remote)
 - Weather station hardware with HTTP API support
+
+**Note:** This application has been primarily developed and tested on Linux environments. While designed to be
+cross-platform, the developer has not extensively tested specific Windows and macOS functionality. User feedback for
+these platforms is welcomed.
 
 ### For End Users
 
@@ -449,6 +453,14 @@ Distributed under the MIT License. See `LICENSE` for more information.
 - Thanks to all contributors who have helped shape this project
 
 ---
+
+*Időkép" and "idokep.hu" are registered trademarks and/or products of Időkép Kft. This project is not affiliated with,
+endorsed by, or sponsored by Időkép Kft. All rights to the Időkép name, logo, services, and products belong to
+Időkép Kft.*
+
+*This application is designed to work with weather station hardware created by Időkép, but is an independent,
+third-party tool. All trademarks, service marks, trade names, and product names referenced in this project
+are the property of their respective owners.*
 
 *This project is designed for educational and research purposes. Always verify weather data with official sources for
 critical applications.*
