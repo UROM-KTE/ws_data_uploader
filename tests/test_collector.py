@@ -114,7 +114,6 @@ def test_sync_pending_data_success(temp_settings_file, sample_weather_data, mock
     """Test successful sync of pending data"""
     with patch('weather_station.collector.DatabaseManager') as mock_db_manager, \
             patch('weather_station.collector.LocalStorageManager') as mock_local_storage:
-
         mock_db_instance = mock_db_manager.return_value
         mock_db_instance.is_connected.return_value = True
         mock_db_instance.save_data.return_value = True
@@ -142,7 +141,6 @@ def test_run_scheduler(temp_settings_file, mock_logger):
             patch('time.sleep', side_effect=InterruptedError), \
             patch('signal.signal') as mock_signal, \
             patch.object(WeatherCollector, 'collect_data') as mock_collect_data:
-
         mock_job = MagicMock()
         mock_every.return_value.minutes.do.return_value = mock_job
 
@@ -183,7 +181,6 @@ def test_collect_data_sensors_request_error(temp_settings_file, mock_logger):
     with patch('weather_station.collector.DatabaseManager'), \
             patch('weather_station.collector.LocalStorageManager') as mock_local_storage, \
             patch('requests.get') as mock_get:
-
         mock_wind_response = MagicMock()
         mock_wind_response.json.return_value = {"speed": 15, "dir": 180}
 
@@ -206,7 +203,6 @@ def test_collect_data_db_not_connected(temp_settings_file, sample_wind_data, sam
     with patch('weather_station.collector.DatabaseManager') as mock_db_manager, \
             patch('weather_station.collector.LocalStorageManager') as mock_local_storage, \
             patch('requests.get') as mock_get:
-
         mock_db_instance = mock_db_manager.return_value
         mock_db_instance.is_connected.return_value = False
 
@@ -234,7 +230,6 @@ def test_sync_pending_data_db_not_connected(temp_settings_file, mock_logger):
     """Test sync_pending_data when the database is not connected"""
     with patch('weather_station.collector.DatabaseManager') as mock_db_manager, \
             patch('weather_station.collector.LocalStorageManager') as mock_local_storage:
-
         mock_db_instance = mock_db_manager.return_value
         mock_db_instance.is_connected.return_value = False
 
@@ -250,7 +245,6 @@ def test_sync_pending_data_no_pending_data(temp_settings_file, mock_logger):
     """Test sync_pending_data when there's no pending data"""
     with patch('weather_station.collector.DatabaseManager') as mock_db_manager, \
             patch('weather_station.collector.LocalStorageManager') as mock_local_storage:
-
         mock_db_instance = mock_db_manager.return_value
         mock_db_instance.is_connected.return_value = True
 
@@ -269,7 +263,6 @@ def test_sync_pending_data_partial_success(temp_settings_file, sample_weather_da
     """Test sync_pending_data with some successful and some failed syncs"""
     with patch('weather_station.collector.DatabaseManager') as mock_db_manager, \
             patch('weather_station.collector.LocalStorageManager') as mock_local_storage:
-
         mock_db_instance = mock_db_manager.return_value
         mock_db_instance.is_connected.return_value = True
 
@@ -297,7 +290,6 @@ def test_sync_pending_data_error(temp_settings_file, sample_weather_data, mock_l
     """Test sync_pending_data handling of exceptions"""
     with patch('weather_station.collector.DatabaseManager') as mock_db_manager, \
             patch('weather_station.collector.LocalStorageManager') as mock_local_storage:
-
         mock_db_instance = mock_db_manager.return_value
         mock_db_instance.is_connected.return_value = True
 
@@ -322,7 +314,6 @@ def test_run_scheduler_shutdown(temp_settings_file, mock_logger):
             patch('time.sleep') as mock_sleep, \
             patch('signal.signal'), \
             patch.object(WeatherCollector, 'collect_data'):
-
         def side_effect(*args, **kwargs):
             nonlocal collector
             if mock_sleep.call_count == 1:
@@ -344,7 +335,6 @@ def test_signal_handler(temp_settings_file, mock_logger):
             patch('schedule.every'), \
             patch('time.sleep', side_effect=InterruptedError), \
             patch('signal.signal') as mock_signal:
-
         collector = WeatherCollector(temp_settings_file)
 
         with pytest.raises(InterruptedError):
@@ -366,7 +356,6 @@ def test_scheduler_loop_error(temp_settings_file, mock_logger):
             patch('schedule.run_pending') as mock_run_pending, \
             patch('time.sleep') as mock_sleep, \
             patch('signal.signal'):
-
         def sleep_side_effect(*args, **kwargs):
             if mock_sleep.call_count >= 1:
                 collector.running = False

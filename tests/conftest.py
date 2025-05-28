@@ -9,6 +9,7 @@ import pytest
 Settings = Dict[str, Any]
 WeatherData = Dict[str, Any]
 
+
 @pytest.fixture
 def sample_settings() -> Settings:
     """Return sample settings for testing"""
@@ -30,6 +31,7 @@ def sample_settings() -> Settings:
         "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     }
 
+
 @pytest.fixture
 def temp_settings_file(sample_settings: Dict[str, Any]) -> Generator[str, None, None]:
     """Create a temporary settings file for testing"""
@@ -38,6 +40,7 @@ def temp_settings_file(sample_settings: Dict[str, Any]) -> Generator[str, None, 
         json.dump(sample_settings, f)
     yield path
     os.unlink(path)
+
 
 @pytest.fixture
 def sample_wind_data() -> Dict[str, Any]:
@@ -50,6 +53,7 @@ def sample_wind_data() -> Dict[str, Any]:
         "min1dir": 175,
         "forevermax": 35
     }
+
 
 @pytest.fixture
 def sample_sensors_data() -> Dict[str, Any]:
@@ -64,6 +68,7 @@ def sample_sensors_data() -> Dict[str, Any]:
         "billenes": 0,
         "end": 1
     }
+
 
 @pytest.fixture
 def sample_weather_data() -> Dict[str, Any]:
@@ -87,6 +92,7 @@ def sample_weather_data() -> Dict[str, Any]:
         "end": 1
     }
 
+
 @pytest.fixture
 def temp_db_path() -> Generator[str, None, None]:
     """Create a temporary file path for the SQLite database"""
@@ -95,6 +101,7 @@ def temp_db_path() -> Generator[str, None, None]:
     yield path
     if os.path.exists(path):
         os.unlink(path)
+
 
 @pytest.fixture
 def fast_requests():
@@ -107,7 +114,7 @@ def fast_requests():
         "min1dir": 175,
         "forevermax": 25
     }
-    
+
     sensors_data = {
         "hom": 22.5,
         "hom2": 21.8,
@@ -118,20 +125,20 @@ def fast_requests():
         "billenes": 800,
         "end": 0
     }
-    
+
     def mock_get(url, **kwargs):
         """Fast mock replacement for requests.get that returns canned responses"""
         response = MagicMock()
         response.raise_for_status = MagicMock()
-        
+
         if 'wind.json' in url:
             response.json.return_value = wind_data
         elif 'sensors.json' in url:
             response.json.return_value = sensors_data
         else:
             response.json.return_value = {}
-            
+
         return response
-    
+
     with patch('requests.get', side_effect=mock_get):
         yield

@@ -28,14 +28,22 @@ class LocalStorageManager:
             cursor: sqlite3.Cursor = conn.cursor()
 
             cursor.execute('''
-                        CREATE TABLE IF NOT EXISTS weather_data
-                        (
-                            id TEXT PRIMARY KEY,
-                            data TEXT,
-                            synced INTEGER DEFAULT 0,
-                            timestamp TEXT
-                        )
-                        ''')
+                           CREATE TABLE IF NOT EXISTS weather_data
+                           (
+                               id
+                               TEXT
+                               PRIMARY
+                               KEY,
+                               data
+                               TEXT,
+                               synced
+                               INTEGER
+                               DEFAULT
+                               0,
+                               timestamp
+                               TEXT
+                           )
+                           ''')
 
             conn.commit()
             conn.close()
@@ -60,7 +68,7 @@ class LocalStorageManager:
                 "INSERT INTO weather_data (id, data, timestamp) VALUES (?, ?, datetime('now'))",
                 (data_id, data_json)
             )
-    
+
             conn.commit()
             conn.close()
             self.logger.info(f"Data saved to local storage with ID: {data_id}")
@@ -76,18 +84,18 @@ class LocalStorageManager:
             self.logger.debug(f"Fetching up to {limit} pending records from local storage")
             conn: sqlite3.Connection = sqlite3.connect(self.db_path)
             cursor: sqlite3.Cursor = conn.cursor()
-    
+
             cursor.execute(
                 "SELECT id, data FROM weather_data WHERE synced = 0 ORDER BY timestamp ASC LIMIT ?",
                 (limit,)
             )
-    
+
             results: List[WeatherData] = []
             for row in cursor.fetchall():
                 data: WeatherData = json.loads(row[1])
                 data['id'] = row[0]
                 results.append(data)
-    
+
             conn.close()
             self.logger.info(f"Retrieved {len(results)} pending records from local storage")
             return results
@@ -101,12 +109,12 @@ class LocalStorageManager:
         try:
             conn: sqlite3.Connection = sqlite3.connect(self.db_path)
             cursor: sqlite3.Cursor = conn.cursor()
-    
+
             cursor.execute(
                 "UPDATE weather_data SET synced = 1 WHERE id = ?",
                 (data_id,)
             )
-    
+
             conn.commit()
             conn.close()
             self.logger.debug(f"Record {data_id} marked as synced")
