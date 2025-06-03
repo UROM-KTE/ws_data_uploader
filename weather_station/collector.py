@@ -38,6 +38,7 @@ class WeatherCollector:
         """Collect data from the weather station and store it"""
         self.logger.debug("Starting data collection")
         timestamp: datetime.datetime = datetime.datetime.now()
+        missing_json_counter = 0
 
         try:
             self.logger.debug(f"Requesting data from weather station at {self.settings['station_ip']}")
@@ -52,7 +53,15 @@ class WeatherCollector:
                 self.logger.debug("Successfully retrieved wind data")
             except requests.RequestException as e:
                 self.logger.error(f"Error retrieving wind data: {e}")
-                return
+                missing_json_counter += 1
+                wind_data: Dict[str, None] = {
+                    "speed": None,
+                    "dir": None,
+                    "min1max": None,
+                    "min1avgspeed": None,
+                    "min1dir": None,
+                    "forevermax": None
+                }
 
             try:
                 sensors_response: requests.Response = requests.get(
@@ -64,6 +73,20 @@ class WeatherCollector:
                 self.logger.debug("Successfully retrieved sensor data")
             except requests.RequestException as e:
                 self.logger.error(f"Error retrieving sensor data: {e}")
+                missing_json_counter += 1
+                sensors_data: Dict[str, None] = {
+                    "hom": None,
+                    "hom2": None,
+                    "rh": None,
+                    "p": None,
+                    "ap": None,
+                    "csap": None,
+                    "billenes": None,
+                    "end": None
+                }
+
+            if missing_json_counter >= 2:
+                self.logger.error("Failed to retrieve data from weather station, aborting collection")
                 return
 
             data: WeatherData = {
