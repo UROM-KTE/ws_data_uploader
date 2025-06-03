@@ -165,15 +165,21 @@ def test_collect_data_wind_request_error(temp_settings_file, mock_logger):
     """Test handling of wind data request errors"""
     with patch('weather_station.collector.DatabaseManager'), \
             patch('weather_station.collector.LocalStorageManager'), \
-            patch('requests.get', side_effect=requests.RequestException("Connection error")):
+            patch('requests.get') as mock_get:
+        # Mock wind request to fail but sensor request to succeed
+        mock_get.side_effect = [
+            requests.RequestException("Connection error"),
+            MagicMock()  # Mock successful sensors response
+        ]
+
         collector = WeatherCollector(temp_settings_file)
         collector.collect_data()
 
-        mock_logger.error.assert_called_with("Error retrieving wind data: Connection error")
+        # Check that we logged the specific wind error
+        mock_logger.error.assert_any_call("Error retrieving wind data: Connection error")
 
-        success_calls = [call for call in mock_logger.debug.call_args_list
-                         if call[0][0] == "Successfully retrieved sensor data"]
-        assert len(success_calls) == 0, "Should not have logged sensor data success"
+        # Verify we called the second request
+        assert mock_get.call_count == 2
 
 
 def test_collect_data_sensors_request_error(temp_settings_file, mock_logger):
@@ -370,3 +376,82 @@ def test_scheduler_loop_error(temp_settings_file, mock_logger):
         mock_logger.error.assert_called_with("Error in scheduler loop: Scheduler error")
         assert mock_sleep.call_count >= 1
         mock_logger.info.assert_any_call("Weather collector stopped")
+
+
+def test_collect_data_sensors_request_error(temp_settings_file, mock_logger):
+    """Test handling of sensor data request errors"""
+    with patch('weather_station.collector.DatabaseManager'), \
+            patch('weather_station.collector.LocalStorageManager'), \
+            patch('requests.get') as mock_get:
+        # Mock successful wind response
+        mock_wind_response = MagicMock()
+        mock_wind_response.json.return_value = {"speed": 15, "dir": 180}
+
+        # Mock requests to return wind success then sensor failure
+        mock_get.side_effect = [
+            mock_wind_response,
+            requests.RequestException("Sensor error")
+        ]
+
+        collector = WeatherCollector(temp_settings_file)
+        collector.collect_data()
+
+        # Verify correct logging
+        mock_logger.debug.assert_any_call("Successfully retrieved wind data")
+        mock_logger.error.assert_any_call("Error retrieving sensor data: Sensor error")
+
+
+def test_collect_data_both_requests_error(temp_settings_file, mock_logger):
+    """Test handling when both wind and sensor requests fail"""
+    with patch('weather_station.collector.DatabaseManager') as mock_db_manager, \
+            patch('weather_station.collector.LocalStorageManager') as mock_local_storage, \
+            patch('requests.get', side_effect=[
+                requests.RequestException("Wind error"),
+                requests.RequestException("Sensor error")
+            ]):
+        collector = WeatherCollector(temp_settings_file)
+        collector.collect_data()
+
+        # Verify we logged both specific errors
+        mock_logger.error.assert_any_call("Error retrieving wind data: Wind error")
+        mock_logger.error.assert_any_call("Error retrieving sensor data: Sensor error")
+
+        # Verify we logged the abort message
+        mock_logger.error.assert_any_call("Failed to retrieve data from weather station, aborting collection")
+
+        # Verify we didn't try to save data
+        mock_db_manager.return_value.save_data.assert_not_called()
+        mock_local_storage.return_value.save_data.assert_not_called()
+
+
+def test_collect_data_with_one_missing_json(temp_settings_file, sample_wind_data, mock_logger):
+    """Test collection continues with only one missing JSON"""
+    with patch('weather_station.collector.DatabaseManager') as mock_db_manager, \
+            patch('weather_station.collector.LocalStorageManager'), \
+            patch('requests.get') as mock_get:
+        # Set up database mock
+        mock_db_instance = mock_db_manager.return_value
+        mock_db_instance.is_connected.return_value = True
+        mock_db_instance.save_data.return_value = True
+
+        # Mock successful wind response
+        mock_wind_response = MagicMock()
+        mock_wind_response.json.return_value = sample_wind_data
+
+        # Mock requests to return wind success then sensor failure
+        mock_get.side_effect = [
+            mock_wind_response,
+            requests.RequestException("Sensor error")
+        ]
+
+        collector = WeatherCollector(temp_settings_file)
+        collector.collect_data()
+
+        # Verify we still attempted to save data
+        mock_db_instance.save_data.assert_called_once()
+
+        # Check that saved data has None values for sensor data
+        saved_data = mock_db_instance.save_data.call_args[0][0]
+        assert saved_data["temperature1"] is None
+        assert saved_data["pressure"] is None
+        assert saved_data["wind_speed"] is not None  # Wind data should be present
