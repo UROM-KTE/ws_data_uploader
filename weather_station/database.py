@@ -79,7 +79,7 @@ class DatabaseManager:
                 avg_pressure,
                 rain,
                 billenes,
-                end
+                "end"
             ) VALUES (
                 %s,
                 %s,
