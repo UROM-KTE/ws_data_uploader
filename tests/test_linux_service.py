@@ -2,7 +2,7 @@ import json
 import os
 import platform
 import signal
-from unittest.mock import patch, mock_open
+from unittest.mock import patch, mock_open, MagicMock
 
 import pytest
 
@@ -36,15 +36,28 @@ def mock_file_open():
 
 def test_signal_handlers(mock_file_open):
     """Test that signal handlers are registered properly"""
+    from weather_station.collector import WeatherCollector  # Import first!
     # Patch dependencies to avoid actual network/DB calls
     with patch('weather_station.database.DatabaseManager'), \
             patch('weather_station.local_storage.LocalStorageManager'), \
             patch('schedule.every'), \
-            patch('time.sleep', side_effect=InterruptedError), \
-            patch('signal.signal') as mock_signal:
+            patch('time.sleep') as mock_sleep, \
+            patch('signal.signal') as mock_signal, \
+            patch('weather_station.collector.ResourceMonitor') as mock_resource_monitor, \
+            patch('psutil.Process') as mock_process, \
+            patch.object(WeatherCollector, '_make_request'), \
+            patch.object(WeatherCollector, 'collect_data'):
 
-        # Now we can safely import and instantiate
-        from weather_station.collector import WeatherCollector
+        # Mock the ResourceMonitor to avoid psutil issues
+        mock_resource_monitor.return_value = MagicMock()
+
+        def sleep_side_effect(*args, **kwargs):
+            # Exit immediately to avoid long test
+            collector.running = False
+            raise InterruptedError("Test exit")
+
+        mock_sleep.side_effect = sleep_side_effect
+
         collector = WeatherCollector("dummy_path")
 
         # Run the scheduler - this will raise InterruptedError due to our mock
@@ -64,15 +77,27 @@ def test_signal_handlers(mock_file_open):
 
 def test_signal_handling(mock_file_open):
     """Test the signal handler stops the collector properly"""
+    from weather_station.collector import WeatherCollector  # Import first!
     # Patch dependencies to avoid actual network/DB calls
     with patch('weather_station.database.DatabaseManager'), \
             patch('weather_station.local_storage.LocalStorageManager'), \
             patch('schedule.every'), \
-            patch('time.sleep', side_effect=InterruptedError), \
-            patch('signal.signal') as mock_signal:
+            patch('time.sleep') as mock_sleep, \
+            patch('signal.signal') as mock_signal, \
+            patch('weather_station.collector.ResourceMonitor') as mock_resource_monitor, \
+            patch('psutil.Process') as mock_process, \
+            patch.object(WeatherCollector, '_make_request'), \
+            patch.object(WeatherCollector, 'collect_data'):
 
-        # Import the collector
-        from weather_station.collector import WeatherCollector
+        # Mock the ResourceMonitor to avoid psutil issues
+        mock_resource_monitor.return_value = MagicMock()
+
+        def sleep_side_effect(*args, **kwargs):
+            # Exit immediately to avoid long test
+            collector.running = False
+            raise InterruptedError("Test exit")
+
+        mock_sleep.side_effect = sleep_side_effect
 
         # Create a real collector instance (file operations are mocked)
         collector = WeatherCollector("dummy_path")

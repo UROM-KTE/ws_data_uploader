@@ -11,15 +11,11 @@ def test_collect_and_store_data_flow(temp_settings_file, sample_wind_data, sampl
     with open(temp_settings_file, 'r') as f:
         settings = json.load(f)
 
-    with patch('requests.get') as mock_get, \
-            patch('psycopg2.connect', side_effect=Exception("DB connection error")):
-        wind_response = MagicMock()
-        wind_response.json.return_value = sample_wind_data
+    with patch('psycopg2.connect', side_effect=Exception("DB connection error")), \
+            patch.object(WeatherCollector, '_make_request') as mock_make_request:
 
-        sensors_response = MagicMock()
-        sensors_response.json.return_value = sample_sensors_data
-
-        mock_get.side_effect = [wind_response, sensors_response]
+        # Mock the _make_request method to return our sample data
+        mock_make_request.side_effect = [sample_wind_data, sample_sensors_data]
 
         local_storage = LocalStorageManager(db_path=temp_db_path, settings=settings)
 

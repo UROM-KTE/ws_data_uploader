@@ -178,7 +178,7 @@ def test_get_pending_data_with_invalid_json(temp_db_path, mock_logger):
 
     assert pending_data == []
     mock_logger.error.assert_called_once()
-    assert "Error fetching pending records" in mock_logger.error.call_args[0][0]
+    assert "Invalid JSON in record test-id" in mock_logger.error.call_args[0][0]
 
 
 def test_mark_as_synced_nonexistent_id(temp_db_path, mock_logger):

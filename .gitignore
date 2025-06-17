@@ -1,6 +1,11 @@
 # Python related
 .venv/
 venv/
+weather_station.egg-info/
+weather_station_collector.spec
+__pycache__
+.mypy_cache/
+.pytest_cache/
 
 # IDE related
 .idea/
@@ -9,10 +14,8 @@ venv/
 
 # Project related
 weather_station.log
-weather_station_collector.spec
 local_cache.db
 .coverage
 build/
 logs/
 dist/
-weather_station.egg-info/

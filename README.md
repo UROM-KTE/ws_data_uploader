@@ -176,7 +176,7 @@ weather-station/
 1. Clone the repository:
    ```shell script
    git clone [https://github.com/UROM-KTE/ws_data_uploader](https://github.com/UROM-KTE/ws_data_uploader) cd ws_data_uploader
-   ``` 
+   ```
 
    ```
    shell script python -m venv venv
@@ -184,7 +184,7 @@ weather-station/
    venv\Scripts\activate
    # On macOS/Linux
    source venv/bin/activate
-   ``` 
+   ```
 
 3. Install dependencies:
 
@@ -242,7 +242,7 @@ To create a local build for testing:
    ```shell
    # Install the wheel file locally
    pip install --force-reinstall dist/weather_station-x.y.z-py3-none-any.whl
-   
+
    # Run the installed package
    weather-station --config test_settings.json
    ```
@@ -258,7 +258,7 @@ To create a local build for testing:
    ```shell
    # Start a PostgreSQL container
    docker run --name weather-db -e POSTGRES_PASSWORD=testpassword -e POSTGRES_USER=weather_user -e POSTGRES_DB=weather_db -p 5432:5432 -d postgres:14
-   
+
    # Create a test_settings.json file
    cat > test_settings.json << EOL
    {
@@ -275,7 +275,7 @@ To create a local build for testing:
      "local_storage_path": "test_local_data.sqlite"
    }
    EOL
-   
+
    # Set up the database table
    psql -h localhost -U weather_user -d weather_db -c "
    CREATE TABLE weather_data (
@@ -303,14 +303,14 @@ To create a local build for testing:
    ```shell
    # Install Flask if not already installed
    pip install flask
-   
+
    # Create a mock_weather_station.py file
    cat > mock_weather_station.py << EOL
    from flask import Flask, jsonify
    import random
-   
+
    app = Flask(__name__)
-   
+
    @app.route('/wind.json')
    def wind_data():
        return jsonify({
@@ -321,7 +321,7 @@ To create a local build for testing:
            "min1dir": random.randint(0, 359),
            "forevermax": random.uniform(30, 50)
        })
-   
+
    @app.route('/sensors.json')
    def sensor_data():
        return jsonify({
@@ -334,14 +334,14 @@ To create a local build for testing:
            "billenes": random.randint(0, 10),
            "end": random.randint(0, 1)
        })
-   
+
    if __name__ == '__main__':
        app.run(host='0.0.0.0', port=80)
    EOL
-   
+
    # Run the mock server (may require sudo for port 80)
    sudo python mock_weather_station.py
-   
+
    # Alternatively, run on a higher port and update test_settings.json
    python mock_weather_station.py --port 8080
    # Then set "station_ip": "localhost:8080" in test_settings.json
